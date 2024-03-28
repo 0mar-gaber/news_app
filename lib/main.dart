@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:news_app/home/articles_details_screen.dart';
 import 'package:news_app/home/home_screen.dart';
 import 'package:news_app/home/news_Screen.dart';
 import 'package:news_app/theme/app_theme.dart';
@@ -18,7 +19,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         HomeScreen.route:(_)=>const HomeScreen(),
-        NewsScreen.route:(_)=> NewsScreen(),
+        NewsScreen.route:(_)=> const NewsScreen(),
+        ArticlesDetails.route:(_)=>const ArticlesDetails(),
       },
       initialRoute: HomeScreen.route,
       theme: AppTheme.lightTheme,
