@@ -17,7 +17,7 @@ class ArticleWidget extends StatelessWidget {
 
 
     return Container(
-      margin: EdgeInsets.all(width*0.06),
+      margin: EdgeInsets.all(width*0.04),
       height: height*0.4,
       width: width,
       child: Column(

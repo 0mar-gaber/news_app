@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/home/categories_widget.dart';
+import 'package:news_app/home/categories_widget_screen.dart';
 import 'package:news_app/home/news_Screen.dart';
 import 'package:news_app/home/settings_widget.dart';
 
@@ -15,7 +15,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   int index = 0  ;
-  String appBarTitle = "Nws App";
+  String appBarTitle = "News App";
 
   late List<Widget> screens = [
     CategoriesWidget(),
