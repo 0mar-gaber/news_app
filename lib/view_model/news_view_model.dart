@@ -14,11 +14,11 @@ class NewsViewModel extends ChangeNotifier{
     notifyListeners();
   }
 
-  gatNews(categoryID, index) async {
+  gatNews(categoryID, index,String languageCode) async {
     isLoading = true ;
     try{
       if(searchQuery==null){
-        ArticlesResponse response = await ApiManger.getNews(categoryID, index) ;
+        ArticlesResponse response = await ApiManger.getNews(categoryID, index,languageCode) ;
         isLoading = false ;
         notifyListeners();
         if(response.status=="error"){
@@ -29,7 +29,7 @@ class NewsViewModel extends ChangeNotifier{
         }
       }
       else{
-        ArticlesResponse response = await ApiManger.getNewsByQuery(categoryID, index,searchQuery!) ;
+        ArticlesResponse response = await ApiManger.getNewsByQuery(categoryID, index,searchQuery!,languageCode) ;
         isLoading = false ;
         notifyListeners();
         if(response.status=="error"){

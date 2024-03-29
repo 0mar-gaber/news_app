@@ -7,11 +7,11 @@ class SourcesViewModel extends ChangeNotifier{
   String? message ;
   String? state ;
   bool isLoading = false;
-   getSources(String categoryID) async {
+   getSources(String categoryID,String languageCode) async {
     isLoading = true ;
     notifyListeners();
     try{
-      SourceResponse response = await ApiManger.getAllSources(categoryID);
+      SourceResponse response = await ApiManger.getAllSources(categoryID,languageCode);
       isLoading = false ;
       if(response.status=="error"){
         message =response.message;
