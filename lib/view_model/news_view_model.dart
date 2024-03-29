@@ -7,18 +7,39 @@ class NewsViewModel extends ChangeNotifier{
   String? message;
   String? state ;
   bool isLoading= false;
-  gatNews(categoryID, index) async {
+  String? searchQuery;
+
+  getSearchQuery(String query){
+    searchQuery = query ;
+    notifyListeners();
+  }
+
+  gatNews(categoryID, index,String languageCode) async {
     isLoading = true ;
     try{
-      ArticlesResponse response = await ApiManger.getNews(categoryID, index) ;
-      isLoading = false ;
-      notifyListeners();
-      if(response.status=="error"){
-        message= response.message;
-        state = response.status;
-      }else{
-        articles = response.articles??[];
+      if(searchQuery==null){
+        ArticlesResponse response = await ApiManger.getNews(categoryID, index,languageCode) ;
+        isLoading = false ;
+        notifyListeners();
+        if(response.status=="error"){
+          message= response.message;
+          state = response.status;
+        }else{
+          articles = response.articles??[];
+        }
       }
+      else{
+        ArticlesResponse response = await ApiManger.getNewsByQuery(categoryID, index,searchQuery!,languageCode) ;
+        isLoading = false ;
+        notifyListeners();
+        if(response.status=="error"){
+          message= response.message;
+          state = response.status;
+        }else{
+          articles = response.articles??[];
+        }
+      }
+
       notifyListeners();
     }catch(e){
       message =e.toString();
@@ -29,4 +50,5 @@ class NewsViewModel extends ChangeNotifier{
     notifyListeners();
 
   }
+
 }

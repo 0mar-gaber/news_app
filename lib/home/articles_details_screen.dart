@@ -1,6 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/model/article_model.dart';
 import 'package:news_app/reusable_component/article_widget_2.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/language_provider.dart';
 
 class ArticlesDetails extends StatelessWidget {
   static const String route = "Articles Details";
@@ -9,6 +13,8 @@ class ArticlesDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.setLocale(EasyLocalization.of(context)?.currentLocale??const Locale("en"));
+
     Article article = ModalRoute.of(context)!.settings.arguments as Article;
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
@@ -22,7 +28,7 @@ class ArticlesDetails extends StatelessWidget {
             iconTheme: IconThemeData(size: width * 0.05, color: Colors.white),
             leadingWidth: width * 0.14,
             title: Text(
-              "Articles Details",
+              "ArticleDetails".tr(),
               style: TextStyle(fontSize: width * 0.04),
             ),
             toolbarHeight: height * 0.07,

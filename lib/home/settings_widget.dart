@@ -1,4 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:news_app/provider/language_provider.dart';
+import 'package:provider/provider.dart';
 
 class SettingsWidget extends StatefulWidget {
   const SettingsWidget({super.key});
@@ -8,19 +11,25 @@ class SettingsWidget extends StatefulWidget {
 }
 
 class _SettingsWidgetState extends State<SettingsWidget> {
-  String? selectedLang = "English";
+  String? selectedLang ;
 
   @override
   Widget build(BuildContext context) {
+    LanguageProvider languageProvider  = Provider.of<LanguageProvider>(context);
     var height = MediaQuery.of(context).size.height;
     var width= MediaQuery.of(context).size.width;
+    if(EasyLocalization.of(context)?.currentLocale==const Locale("ar")){
+      selectedLang = "العربية";
+    }else{
+      selectedLang = "English";
+    }
     return  Container(
       margin: EdgeInsets.all(width*0.06),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
       
-          Text("language",style: TextStyle(fontWeight: FontWeight.w700,fontSize: width*0.05,color: Colors.black),),
+          Text("Language".tr(),style: TextStyle(fontWeight: FontWeight.w700,fontSize: width*0.05,color: Colors.black),),
           Container(
             margin: EdgeInsets.all(width*0.04),
             decoration:BoxDecoration(
@@ -34,10 +43,12 @@ class _SettingsWidgetState extends State<SettingsWidget> {
                setState(() {
                  selectedLang = value;
                });
-      
-      
+               languageProvider.changeAppLanguage(context, selectedLang!);
+
+
+
               },
-              value:  selectedLang,
+              value: selectedLang,
               alignment: AlignmentDirectional.topStart,
               isExpanded: true,
               padding: const EdgeInsets.all(12),

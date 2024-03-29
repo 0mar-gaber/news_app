@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/home/articles_details_screen.dart';
 import 'package:news_app/model/card_model.dart';
+import 'package:news_app/provider/search_provider.dart';
 import 'package:news_app/view_model/news_view_model.dart';
 import 'package:news_app/view_model/sources_view_model.dart';
 import 'package:provider/provider.dart';
@@ -22,13 +24,25 @@ class _NewsScreenState extends State<NewsScreen> {
   int selectedSource = 0;
   var sourcesViewModel = SourcesViewModel();
   var newsViewModel = NewsViewModel();
+  TextEditingController searchController = TextEditingController();
 
   @override
   @override
   Widget build(BuildContext context) {
-    CardModel cardModel = ModalRoute.of(context)!.settings.arguments as CardModel;
-    var height = MediaQuery.of(context).size.height;
-    var width = MediaQuery.of(context).size.width;
+    SearchProvider searchProvider = Provider.of<SearchProvider>(context);
+    context.setLocale(EasyLocalization.of(context)?.currentLocale??const Locale("en"));
+    CardModel cardModel = ModalRoute
+        .of(context)!
+        .settings
+        .arguments as CardModel;
+    var height = MediaQuery
+        .of(context)
+        .size
+        .height;
+    var width = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     return Container(
         decoration: const BoxDecoration(
@@ -36,8 +50,85 @@ class _NewsScreenState extends State<NewsScreen> {
                 image: AssetImage("assets/images/pattern.jpg"),
                 fit: BoxFit.cover)),
         child: Scaffold(
-          appBar: AppBar(
-            iconTheme: IconThemeData(size: width * 0.05, color: Colors.white),
+          resizeToAvoidBottomInset: false,
+          appBar: searchProvider.isSearchOpen
+              ? AppBar(
+            toolbarHeight: height * 0.07,
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            title: Container(
+              margin: EdgeInsets.only(
+                left: width * 0.05,
+                right: width * 0.05,
+              ),
+              child: TextField(
+                onChanged: (value) {
+                  newsViewModel.getSearchQuery(value);
+                },
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: 'SearchArticle'.tr(),
+                  hintStyle: TextStyle(color: Theme
+                      .of(context)
+                      .colorScheme
+                      .primary
+                      .withOpacity(0.4)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(50),
+                    borderSide: BorderSide(
+                      color: Theme
+                          .of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.4),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(50),
+                    borderSide: BorderSide(
+                      color: Theme
+                          .of(context)
+                          .colorScheme
+                          .primary,
+                    ),
+                  ),
+                  suffixIcon: Padding(
+                    padding: EdgeInsets.only(
+                      right: width * 0.02,
+                    ), // Adjust padding for suffix icon
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.search_sharp, color: Theme
+                          .of(context)
+                          .colorScheme
+                          .primary, size: width * 0.04),
+                    ),
+                  ),
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(
+                      left: width * 0.02,
+                    ), // Adjust padding for suffix icon
+                    child: IconButton(
+                      onPressed: () {
+                        searchProvider.openAndCloseSearchBar();
+                      },
+                      icon: Icon(Icons.close, color: Theme
+                          .of(context)
+                          .colorScheme
+                          .primary, size: width * 0.04),
+                    ),
+                  ),
+                  fillColor: Colors.white,
+                  filled: true,
+                ),
+              ),
+            )
+
+            ,
+          )
+              : AppBar(
+            iconTheme:
+            IconThemeData(size: width * 0.05, color: Colors.white),
             leadingWidth: width * 0.14,
             title: Text(
               cardModel.title,
@@ -45,7 +136,15 @@ class _NewsScreenState extends State<NewsScreen> {
             ),
             toolbarHeight: height * 0.07,
             actions: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+              IconButton(
+                  onPressed: () {
+                    searchProvider.openAndCloseSearchBar();
+                    // showSearch(
+                    //   context: context,
+                    //   delegate: Search(),
+                    // );
+                  },
+                  icon: const Icon(Icons.search)),
               SizedBox(
                 width: width * 0.04,
               ),
@@ -54,7 +153,7 @@ class _NewsScreenState extends State<NewsScreen> {
           body: Column(
             children: [
               ChangeNotifierProvider.value(
-                value: sourcesViewModel..getSources(cardModel.title),
+                value: sourcesViewModel..getSources(cardModel.id),
                 child: Consumer<SourcesViewModel>(
                   builder: (context, value, child) {
                     if (sourcesViewModel.isLoading) {
@@ -70,19 +169,19 @@ class _NewsScreenState extends State<NewsScreen> {
                           isScrollable: true,
                           tabs: List.generate(
                             sourcesViewModel.sources.length,
-                            (index) => Tab(
-                              child: SourcesWidget(
-                                isSelected: selectedSource == index,
-                                source: sourcesViewModel.sources[index],
-                              ),
-                            ),
+                                (index) =>
+                                Tab(
+                                  child: SourcesWidget(
+                                    isSelected: selectedSource == index,
+                                    source: sourcesViewModel.sources[index],
+                                  ),
+                                ),
                           ),
                           dividerColor: Colors.transparent,
                           indicatorColor: Colors.transparent,
                         ),
                       );
                     } else if (sourcesViewModel.message != null) {
-
                       return Center(
                         child: ElevatedButton(
                             onPressed: () {
@@ -103,12 +202,13 @@ class _NewsScreenState extends State<NewsScreen> {
                           isScrollable: true,
                           tabs: List.generate(
                             sourcesViewModel.sources.length,
-                            (index) => Tab(
-                              child: SourcesWidget(
-                                isSelected: selectedSource == index,
-                                source: sourcesViewModel.sources[index],
-                              ),
-                            ),
+                                (index) =>
+                                Tab(
+                                  child: SourcesWidget(
+                                    isSelected: selectedSource == index,
+                                    source: sourcesViewModel.sources[index],
+                                  ),
+                                ),
                           ),
                           dividerColor: Colors.transparent,
                           indicatorColor: Colors.transparent,
@@ -119,15 +219,13 @@ class _NewsScreenState extends State<NewsScreen> {
                 ),
               ),
               ChangeNotifierProvider.value(
-                value: newsViewModel..gatNews(cardModel.title, selectedSource),
+                value: newsViewModel..gatNews(cardModel.id, selectedSource),
                 child: Expanded(
                   child: Consumer<NewsViewModel>(
                     builder: (context, value, child) {
                       if (newsViewModel.isLoading) {
                         return const Center(child: CircularProgressIndicator());
-                      }
-                      else if (newsViewModel.message != null) {
-
+                      } else if (newsViewModel.message != null) {
                         return Center(
                           child: ElevatedButton(
                               onPressed: () {
@@ -135,16 +233,18 @@ class _NewsScreenState extends State<NewsScreen> {
                               },
                               child: const Text("try again")),
                         );
-                      }
-                      else {
-
+                      } else {
                         return ListView.builder(
                           itemBuilder: (context, index) =>
                               InkWell(
-                                onTap: () {
-                                  Navigator.pushNamed(context, ArticlesDetails.route,arguments: newsViewModel.articles[index]);
-                                },
-                                  child: ArticleWidget(article: newsViewModel.articles[index])),
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                        context, ArticlesDetails.route,
+                                        arguments: newsViewModel
+                                            .articles[index]);
+                                  },
+                                  child: ArticleWidget(
+                                      article: newsViewModel.articles[index])),
                           itemCount: newsViewModel.articles.length,
                         );
                       }
@@ -154,6 +254,7 @@ class _NewsScreenState extends State<NewsScreen> {
               ),
             ],
           ),
+
         ));
   }
 }
