@@ -1,7 +1,9 @@
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/home/categories_widget_screen.dart';
-import 'package:news_app/home/news_Screen.dart';
 import 'package:news_app/home/settings_widget.dart';
+
 
 class HomeScreen extends StatefulWidget {
   static const String route = "home";
@@ -15,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   int index = 0  ;
-  String appBarTitle = "News App";
+  String appBarTitle = "NewsApp".tr();
 
   late List<Widget> screens = [
     CategoriesWidget(),
@@ -26,8 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.setLocale(EasyLocalization.of(context)?.currentLocale??const Locale("en"));
+
     var height = MediaQuery.of(context).size.height;
     var width= MediaQuery.of(context).size.width;
+    if(index==1&&EasyLocalization.of(context)?.currentLocale==const Locale("ar")){
+      appBarTitle="الاعدادات";
+    }else if(index==1&&EasyLocalization.of(context)?.currentLocale==const Locale("en")){
+      appBarTitle="Settings";
+    }
     return Container(
       decoration: const BoxDecoration(image: DecorationImage(image: AssetImage("assets/images/pattern.jpg"),fit: BoxFit.cover)),
       child:  Scaffold(
@@ -49,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   color: Theme.of(context).colorScheme.primary,
                   child:  Center(child: Text(
-                      "News App!",
+                      "NewsApp".tr(),
                     style: TextStyle(
                       fontSize: width*0.047,
                       fontWeight: FontWeight.w600,
@@ -70,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () {
                             setState(() {
                               index = 0;
-                              appBarTitle = "News App";
+                              appBarTitle = "NewsApp".tr();
 
                             });
                             Navigator.pop(context);
@@ -80,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Icon(Icons.view_list,color: Colors.black,size: width*0.06,),
                               SizedBox(width: width*0.01,),
-                              Text("Categories",style: TextStyle(
+                              Text("Categories".tr(),style: TextStyle(
                                   fontSize: width*0.047,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.black
@@ -93,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () {
                             setState(() {
                               index=1;
-                              appBarTitle = "Settings";
+                              appBarTitle = "Settings".tr();
                             });
                             Navigator.pop(context);
                           },
@@ -101,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Icon(Icons.settings,color: Colors.black,size: width*0.06,),
                               SizedBox(width: width*0.01,),
-                              Text("Settings",style: TextStyle(
+                              Text("Settings".tr(),style: TextStyle(
                                   fontSize: width*0.047,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.black

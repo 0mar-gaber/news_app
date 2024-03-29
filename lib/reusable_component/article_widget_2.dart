@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:news_app/model/article_model.dart';
@@ -131,7 +132,7 @@ class ArticleWidget2 extends StatelessWidget {
                             width: width * 0.02,
                           ),
                           Text(
-                            "View Full Article",
+                            "ViewFullArticles".tr(),
                             style: TextStyle(
                               fontSize: width * 0.03,
                               color: Colors.black,
