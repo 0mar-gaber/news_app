@@ -1,12 +1,9 @@
-import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:news_app/api/api_manger.dart';
 import 'package:news_app/home/articles_details_screen.dart';
 import 'package:news_app/model/card_model.dart';
-import 'package:news_app/model/sources_model.dart';
 import 'package:news_app/provider/search_provider.dart';
 import 'package:news_app/view_model/news_view_model.dart';
 import 'package:news_app/view_model/sources_view_model.dart';
@@ -36,11 +33,11 @@ class _NewsScreenState extends State<NewsScreen> {
   Widget build(BuildContext context) {
     CardModel cardModel = ModalRoute.of(context)!.settings.arguments as CardModel;
     String languageCode = EasyLocalization.of(context)?.currentLocale.toString() ?? "en";
-    SearchProvider searchProvider = Provider.of<SearchProvider>(context);
     context.setLocale(EasyLocalization.of(context)?.currentLocale ?? const Locale("en"));
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
+    SearchProvider searchProvider = Provider.of<SearchProvider>(context);
 
     return Container(
         decoration: const BoxDecoration(
@@ -66,6 +63,7 @@ class _NewsScreenState extends State<NewsScreen> {
                         });
                       },
                       controller: searchController,
+                      autofocus: true,
                       decoration: InputDecoration(
                         hintText: 'SearchArticle'.tr(),
                         hintStyle: TextStyle(
@@ -108,12 +106,10 @@ class _NewsScreenState extends State<NewsScreen> {
                           ), // Adjust padding for suffix icon
                           child: IconButton(
                             onPressed: () {
-                              setState(() {
-                                searchProvider.openAndCloseSearchBar();
-                                searchController.clear();
-                                searchQuery=null;
-                              });
-                            },
+                              SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
+                              searchProvider.openAndCloseSearchBar();
+                              searchController.clear();
+                              searchQuery=null;                            },
                             icon: Icon(Icons.arrow_back_ios_sharp,
                                 color: Theme.of(context).colorScheme.primary,
                                 size: width * 0.04),
@@ -137,6 +133,7 @@ class _NewsScreenState extends State<NewsScreen> {
                   actions: [
                     IconButton(
                         onPressed: () {
+                          SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
                           searchProvider.openAndCloseSearchBar();
                         },
                         icon: const Icon(Icons.search)),
@@ -147,8 +144,8 @@ class _NewsScreenState extends State<NewsScreen> {
                 ),
           body: Column(
             children: [
-              BlocProvider.value(
-                value:SourcesViewModel()..getSources(cardModel.id, languageCode),
+              BlocProvider(
+                create:(context) => SourcesViewModel()..getSources(cardModel.id, languageCode),
                 child: BlocBuilder<SourcesViewModel,SourcesState>(
                   builder: (context, state) {
                     if(state is SourcesError){
@@ -190,75 +187,10 @@ class _NewsScreenState extends State<NewsScreen> {
                         ),
                       );
                     }
-                    var list = cashingSources(languageCode);
-                    return  ;
+                    return const SizedBox() ;
                   },
                 ),
               ),
-              // ChangeNotifierProvider.value(
-              //   value: sourcesViewModel..getSources(cardModel.id, languageCode),
-              //   child: Consumer<SourcesViewModel>(
-              //     builder: (context, value, child) {
-              //       if (sourcesViewModel.isLoading) {
-              //         return DefaultTabController(
-              //           length: sourcesViewModel.sources.length,
-              //           child: TabBar(
-              //             onTap: (index) {
-              //               setState(() {
-              //                 selectedSource =
-              //                     index; // Update selectedSource when a tab is tapped
-              //               });
-              //             },
-              //             isScrollable: true,
-              //             tabs: List.generate(
-              //               sourcesViewModel.sources.length,
-              //               (index) => Tab(
-              //                 child: SourcesWidget(
-              //                   isSelected: selectedSource == index,
-              //                   source: sourcesViewModel.sources[index],
-              //                 ),
-              //               ),
-              //             ),
-              //             dividerColor: Colors.transparent,
-              //             indicatorColor: Colors.transparent,
-              //           ),
-              //         );
-              //       } else if (sourcesViewModel.message != null) {
-              //         return Center(
-              //           child: ElevatedButton(
-              //               onPressed: () {
-              //                 setState(() {});
-              //               },
-              //               child: const Text("try again")),
-              //         );
-              //       } else {
-              //         return DefaultTabController(
-              //           length: sourcesViewModel.sources.length,
-              //           child: TabBar(
-              //             onTap: (index) {
-              //               setState(() {
-              //                 selectedSource =
-              //                     index; // Update selectedSource when a tab is tapped
-              //               });
-              //             },
-              //             isScrollable: true,
-              //             tabs: List.generate(
-              //               sourcesViewModel.sources.length,
-              //               (index) => Tab(
-              //                 child: SourcesWidget(
-              //                   isSelected: selectedSource == index,
-              //                   source: sourcesViewModel.sources[index],
-              //                 ),
-              //               ),
-              //             ),
-              //             dividerColor: Colors.transparent,
-              //             indicatorColor: Colors.transparent,
-              //           ),
-              //         );
-              //       }
-              //     },
-              //   ),
-              // ),
               Expanded(
                 child: BlocProvider.value(
                   value: NewsViewModel()..getNews(cardModel.id, selectedSource, languageCode, searchQuery),
@@ -299,13 +231,6 @@ class _NewsScreenState extends State<NewsScreen> {
             ],
           ),
         ));
-  }
-  Future<List<SourceModel>> cashingSources(String languageCode) async {
-    var sourceResponse = await ApiManger.getAllSources(cardModel.id, languageCode) ;
-
-    List<SourceModel> cashingSourceList =  sourceResponse.sources??[] ;
-
-    return cashingSourceList ;
   }
 
 }
