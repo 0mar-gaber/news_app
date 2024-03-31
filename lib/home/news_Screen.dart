@@ -1,4 +1,3 @@
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +36,6 @@ class _NewsScreenState extends State<NewsScreen> {
 
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    SearchProvider searchProvider = Provider.of<SearchProvider>(context);
 
     return Container(
         decoration: const BoxDecoration(
@@ -46,102 +44,205 @@ class _NewsScreenState extends State<NewsScreen> {
                 fit: BoxFit.cover)),
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: searchProvider.isSearchOpen
-              ? AppBar(
-                  toolbarHeight: height * 0.07,
-                  automaticallyImplyLeading: false,
-                  centerTitle: true,
-                  title: Container(
-                    margin: EdgeInsets.only(
-                      left: width * 0.05,
-                      right: width * 0.05,
-                    ),
-                    child: TextField(
-                      onSubmitted: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-                      controller: searchController,
-                      autofocus: true,
-                      decoration: InputDecoration(
-                        hintText: 'SearchArticle'.tr(),
-                        hintStyle: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.4)),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                          borderSide: BorderSide(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.4),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                          borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                        suffixIcon: Padding(
-                          padding: EdgeInsets.only(
-                            right: width * 0.02,
-                          ), // Adjust padding for suffix icon
-                          child: IconButton(
-                            onPressed: () {
-                              searchQuery=null;
-                              searchController.clear();
+          appBar:PreferredSize(
+              preferredSize: Size(width, height*0.07),
+              child: Consumer<SearchProvider>(
+
+                builder: (context, value, child) {
+                  return value.isSearchOpen
+                      ? AppBar(
+                          toolbarHeight: height * 0.07,
+                          automaticallyImplyLeading: false,
+                          centerTitle: true,
+                          title: Container(
+                            margin: EdgeInsets.only(
+                              left: width * 0.05,
+                              right: width * 0.05,
+                            ),
+                            child: TextField(
+                              onSubmitted: (value) {
+                                setState(() {
+                                  searchQuery = value;
+                                });
                               },
-                            icon: Icon(Icons.clear_rounded,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: width * 0.04),
+                              controller: searchController,
+                              autofocus: false,
+                              decoration: InputDecoration(
+                                hintText: 'SearchArticle'.tr(),
+                                hintStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.4)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.4),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                                suffixIcon: Padding(
+                                  padding: EdgeInsets.only(
+                                    right: width * 0.02,
+                                  ), // Adjust padding for suffix icon
+                                  child: IconButton(
+                                    onPressed: () {
+                                      searchQuery=null;
+                                      searchController.clear();
+                                      },
+                                    icon: Icon(Icons.clear_rounded,
+                                        color: Theme.of(context).colorScheme.primary,
+                                        size: width * 0.04),
+                                  ),
+                                ),
+                                prefixIcon: Padding(
+                                  padding: EdgeInsets.only(
+                                    left: width * 0.02,
+                                  ), // Adjust padding for suffix icon
+                                  child: IconButton(
+                                    onPressed: () {
+                                      SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
+                                      searchProvider.openAndCloseSearchBar();
+                                      searchController.clear();
+                                      searchQuery=null;                            },
+                                    icon: Icon(Icons.arrow_back_ios_sharp,
+                                        color: Theme.of(context).colorScheme.primary,
+                                        size: width * 0.04),
+                                  ),
+                                ),
+                                fillColor: Colors.white,
+                                filled: true,
+                              ),
+                            ),
                           ),
-                        ),
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(
-                            left: width * 0.02,
-                          ), // Adjust padding for suffix icon
-                          child: IconButton(
-                            onPressed: () {
-                              SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
-                              searchProvider.openAndCloseSearchBar();
-                              searchController.clear();
-                              searchQuery=null;                            },
-                            icon: Icon(Icons.arrow_back_ios_sharp,
-                                color: Theme.of(context).colorScheme.primary,
-                                size: width * 0.04),
+                        )
+                      : AppBar(
+                          iconTheme:
+                              IconThemeData(size: width * 0.05, color: Colors.white),
+                          leadingWidth: width * 0.14,
+                          title: Text(
+                            cardModel.title,
+                            style: TextStyle(fontSize: width * 0.04),
                           ),
-                        ),
-                        fillColor: Colors.white,
-                        filled: true,
-                      ),
-                    ),
-                  ),
-                )
-              : AppBar(
-                  iconTheme:
-                      IconThemeData(size: width * 0.05, color: Colors.white),
-                  leadingWidth: width * 0.14,
-                  title: Text(
-                    cardModel.title,
-                    style: TextStyle(fontSize: width * 0.04),
-                  ),
-                  toolbarHeight: height * 0.07,
-                  actions: [
-                    IconButton(
-                        onPressed: () {
-                          SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
-                          searchProvider.openAndCloseSearchBar();
-                        },
-                        icon: const Icon(Icons.search)),
-                    SizedBox(
-                      width: width * 0.04,
-                    ),
-                  ],
-                ),
+                          toolbarHeight: height * 0.07,
+                          actions: [
+                            IconButton(
+                                onPressed: () {
+                                  value.openAndCloseSearchBar();
+                                },
+                                icon: const Icon(Icons.search)),
+                            SizedBox(
+                              width: width * 0.04,
+                            ),
+                          ],
+                        );
+                },
+              )
+          ) ,
+          // searchProvider.isSearchOpen
+          //     ? AppBar(
+          //         toolbarHeight: height * 0.07,
+          //         automaticallyImplyLeading: false,
+          //         centerTitle: true,
+          //         title: Container(
+          //           margin: EdgeInsets.only(
+          //             left: width * 0.05,
+          //             right: width * 0.05,
+          //           ),
+          //           child: TextField(
+          //             onSubmitted: (value) {
+          //               setState(() {
+          //                 searchQuery = value;
+          //               });
+          //             },
+          //             controller: searchController,
+          //             autofocus: true,
+          //             decoration: InputDecoration(
+          //               hintText: 'SearchArticle'.tr(),
+          //               hintStyle: TextStyle(
+          //                   color: Theme.of(context)
+          //                       .colorScheme
+          //                       .primary
+          //                       .withOpacity(0.4)),
+          //               enabledBorder: OutlineInputBorder(
+          //                 borderRadius: BorderRadius.circular(50),
+          //                 borderSide: BorderSide(
+          //                   color: Theme.of(context)
+          //                       .colorScheme
+          //                       .primary
+          //                       .withOpacity(0.4),
+          //                 ),
+          //               ),
+          //               focusedBorder: OutlineInputBorder(
+          //                 borderRadius: BorderRadius.circular(50),
+          //                 borderSide: BorderSide(
+          //                   color: Theme.of(context).colorScheme.primary,
+          //                 ),
+          //               ),
+          //               suffixIcon: Padding(
+          //                 padding: EdgeInsets.only(
+          //                   right: width * 0.02,
+          //                 ), // Adjust padding for suffix icon
+          //                 child: IconButton(
+          //                   onPressed: () {
+          //                     searchQuery=null;
+          //                     searchController.clear();
+          //                     },
+          //                   icon: Icon(Icons.clear_rounded,
+          //                       color: Theme.of(context).colorScheme.primary,
+          //                       size: width * 0.04),
+          //                 ),
+          //               ),
+          //               prefixIcon: Padding(
+          //                 padding: EdgeInsets.only(
+          //                   left: width * 0.02,
+          //                 ), // Adjust padding for suffix icon
+          //                 child: IconButton(
+          //                   onPressed: () {
+          //                     SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
+          //                     searchProvider.openAndCloseSearchBar();
+          //                     searchController.clear();
+          //                     searchQuery=null;                            },
+          //                   icon: Icon(Icons.arrow_back_ios_sharp,
+          //                       color: Theme.of(context).colorScheme.primary,
+          //                       size: width * 0.04),
+          //                 ),
+          //               ),
+          //               fillColor: Colors.white,
+          //               filled: true,
+          //             ),
+          //           ),
+          //         ),
+          //       )
+          //     : AppBar(
+          //         iconTheme:
+          //             IconThemeData(size: width * 0.05, color: Colors.white),
+          //         leadingWidth: width * 0.14,
+          //         title: Text(
+          //           cardModel.title,
+          //           style: TextStyle(fontSize: width * 0.04),
+          //         ),
+          //         toolbarHeight: height * 0.07,
+          //         actions: [
+          //           IconButton(
+          //               onPressed: () {
+          //                 SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
+          //                 searchProvider.openAndCloseSearchBar();
+          //               },
+          //               icon: const Icon(Icons.search)),
+          //           SizedBox(
+          //             width: width * 0.04,
+          //           ),
+          //         ],
+          //       ),
           body: Column(
             children: [
               BlocProvider(
