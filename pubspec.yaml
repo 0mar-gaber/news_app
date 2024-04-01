@@ -43,6 +43,7 @@ dependencies:
   provider: ^6.1.2
   url_launcher: ^6.2.5
   easy_localization: ^3.0.5
+  flutter_bloc: ^8.1.5
 
 
 dev_dependencies:

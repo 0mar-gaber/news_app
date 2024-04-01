@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/home/articles_details_screen.dart';
 import 'package:news_app/model/card_model.dart';
 import 'package:news_app/provider/search_provider.dart';
@@ -23,26 +24,18 @@ class NewsScreen extends StatefulWidget {
 class _NewsScreenState extends State<NewsScreen> {
   int selectedSource = 0;
   var sourcesViewModel = SourcesViewModel();
-  var newsViewModel = NewsViewModel();
   TextEditingController searchController = TextEditingController();
+  String? searchQuery;
+  late CardModel cardModel ;
 
   @override
-  @override
   Widget build(BuildContext context) {
-    SearchProvider searchProvider = Provider.of<SearchProvider>(context);
-    context.setLocale(EasyLocalization.of(context)?.currentLocale??const Locale("en"));
-    CardModel cardModel = ModalRoute
-        .of(context)!
-        .settings
-        .arguments as CardModel;
-    var height = MediaQuery
-        .of(context)
-        .size
-        .height;
-    var width = MediaQuery
-        .of(context)
-        .size
-        .width;
+    CardModel cardModel = ModalRoute.of(context)!.settings.arguments as CardModel;
+    String languageCode = EasyLocalization.of(context)?.currentLocale.toString() ?? "en";
+    context.setLocale(EasyLocalization.of(context)?.currentLocale ?? const Locale("en"));
+
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
 
     return Container(
         decoration: const BoxDecoration(
@@ -51,147 +44,132 @@ class _NewsScreenState extends State<NewsScreen> {
                 fit: BoxFit.cover)),
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: searchProvider.isSearchOpen
-              ? AppBar(
-            toolbarHeight: height * 0.07,
-            automaticallyImplyLeading: false,
-            centerTitle: true,
-            title: Container(
-              margin: EdgeInsets.only(
-                left: width * 0.05,
-                right: width * 0.05,
-              ),
-              child: TextField(
-                onChanged: (value) {
-                  newsViewModel.getSearchQuery(value);
-                },
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: 'SearchArticle'.tr(),
-                  hintStyle: TextStyle(color: Theme
-                      .of(context)
-                      .colorScheme
-                      .primary
-                      .withOpacity(0.4)),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: BorderSide(
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.4),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                    borderSide: BorderSide(
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .primary,
-                    ),
-                  ),
-                  suffixIcon: Padding(
-                    padding: EdgeInsets.only(
-                      right: width * 0.02,
-                    ), // Adjust padding for suffix icon
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.search_sharp, color: Theme
-                          .of(context)
-                          .colorScheme
-                          .primary, size: width * 0.04),
-                    ),
-                  ),
-                  prefixIcon: Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.02,
-                    ), // Adjust padding for suffix icon
-                    child: IconButton(
-                      onPressed: () {
-                        searchProvider.openAndCloseSearchBar();
-                      },
-                      icon: Icon(Icons.close, color: Theme
-                          .of(context)
-                          .colorScheme
-                          .primary, size: width * 0.04),
-                    ),
-                  ),
-                  fillColor: Colors.white,
-                  filled: true,
-                ),
-              ),
-            )
+          appBar:PreferredSize(
+              preferredSize: Size(width, height*0.07),
+              child: Consumer<SearchProvider>(
 
-            ,
-          )
-              : AppBar(
-            iconTheme:
-            IconThemeData(size: width * 0.05, color: Colors.white),
-            leadingWidth: width * 0.14,
-            title: Text(
-              cardModel.title,
-              style: TextStyle(fontSize: width * 0.04),
-            ),
-            toolbarHeight: height * 0.07,
-            actions: [
-              IconButton(
-                  onPressed: () {
-                    searchProvider.openAndCloseSearchBar();
-                    // showSearch(
-                    //   context: context,
-                    //   delegate: Search(),
-                    // );
-                  },
-                  icon: const Icon(Icons.search)),
-              SizedBox(
-                width: width * 0.04,
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              ChangeNotifierProvider.value(
-                value: sourcesViewModel..getSources(cardModel.id),
-                child: Consumer<SourcesViewModel>(
-                  builder: (context, value, child) {
-                    if (sourcesViewModel.isLoading) {
-                      return DefaultTabController(
-                        length: sourcesViewModel.sources.length,
-                        child: TabBar(
-                          onTap: (index) {
-                            setState(() {
-                              selectedSource =
-                                  index; // Update selectedSource when a tab is tapped
-                            });
-                          },
-                          isScrollable: true,
-                          tabs: List.generate(
-                            sourcesViewModel.sources.length,
-                                (index) =>
-                                Tab(
-                                  child: SourcesWidget(
-                                    isSelected: selectedSource == index,
-                                    source: sourcesViewModel.sources[index],
+                builder: (context, value, child) {
+                  return value.isSearchOpen
+                      ? AppBar(
+                          toolbarHeight: height * 0.07,
+                          automaticallyImplyLeading: false,
+                          centerTitle: true,
+                          title: Container(
+                            margin: EdgeInsets.only(
+                              left: width * 0.05,
+                              right: width * 0.05,
+                            ),
+                            child: TextField(
+                              onSubmitted: (value) {
+                                setState(() {
+                                  searchQuery = value;
+                                });
+                              },
+                              controller: searchController,
+                              autofocus: false,
+                              decoration: InputDecoration(
+                                hintText: 'SearchArticle'.tr(),
+                                hintStyle: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.4)),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.4),
                                   ),
                                 ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                                suffixIcon: Padding(
+                                  padding: EdgeInsets.only(
+                                    right: width * 0.02,
+                                  ), // Adjust padding for suffix icon
+                                  child: IconButton(
+                                    onPressed: () {
+                                      searchQuery=null;
+                                      searchController.clear();
+                                      },
+                                    icon: Icon(Icons.clear_rounded,
+                                        color: Theme.of(context).colorScheme.primary,
+                                        size: width * 0.04),
+                                  ),
+                                ),
+                                prefixIcon: Padding(
+                                  padding: EdgeInsets.only(
+                                    left: width * 0.02,
+                                  ), // Adjust padding for suffix icon
+                                  child: IconButton(
+                                    onPressed: () {
+                                      SearchProvider searchProvider = Provider.of<SearchProvider>(context,listen: false);
+                                      searchProvider.openAndCloseSearchBar();
+                                      searchController.clear();
+                                      searchQuery=null;                            },
+                                    icon: Icon(Icons.arrow_back_ios_sharp,
+                                        color: Theme.of(context).colorScheme.primary,
+                                        size: width * 0.04),
+                                  ),
+                                ),
+                                fillColor: Colors.white,
+                                filled: true,
+                              ),
+                            ),
                           ),
-                          dividerColor: Colors.transparent,
-                          indicatorColor: Colors.transparent,
-                        ),
-                      );
-                    } else if (sourcesViewModel.message != null) {
+                        )
+                      : AppBar(
+                          iconTheme:
+                              IconThemeData(size: width * 0.05, color: Colors.white),
+                          leadingWidth: width * 0.14,
+                          title: Text(
+                            cardModel.title,
+                            style: TextStyle(fontSize: width * 0.04),
+                          ),
+                          toolbarHeight: height * 0.07,
+                          actions: [
+                            IconButton(
+                                onPressed: () {
+                                  value.openAndCloseSearchBar();
+                                },
+                                icon: const Icon(Icons.search)),
+                            SizedBox(
+                              width: width * 0.04,
+                            ),
+                          ],
+                        );
+                },
+              )
+          ) ,
+          body: Column(
+            children: [
+              BlocProvider(
+                create:(context) => SourcesViewModel()..getSources(cardModel.id, languageCode),
+                child: BlocBuilder<SourcesViewModel,SourcesState>(
+                  builder: (context, state) {
+                    if(state is SourcesError){
                       return Center(
                         child: ElevatedButton(
                             onPressed: () {
-                              setState(() {});
+                              BlocProvider.of<NewsViewModel>(context).getNews(
+                                  cardModel.id,
+                                  selectedSource,
+                                  languageCode,
+                                  searchController.toString());
                             },
                             child: const Text("try again")),
                       );
-                    } else {
+
+                    }
+                    if( state is SourcesSuccess){
                       return DefaultTabController(
-                        length: sourcesViewModel.sources.length,
+                        length: state.listOfSources.length,
                         child: TabBar(
                           onTap: (index) {
                             setState(() {
@@ -201,60 +179,63 @@ class _NewsScreenState extends State<NewsScreen> {
                           },
                           isScrollable: true,
                           tabs: List.generate(
-                            sourcesViewModel.sources.length,
-                                (index) =>
-                                Tab(
-                                  child: SourcesWidget(
-                                    isSelected: selectedSource == index,
-                                    source: sourcesViewModel.sources[index],
-                                  ),
-                                ),
+                            state.listOfSources.length,
+                            (index) => Tab(
+                              child: SourcesWidget(
+                                isSelected: selectedSource == index,
+                                source: state.listOfSources[index],
+                              ),
+                            ),
                           ),
                           dividerColor: Colors.transparent,
                           indicatorColor: Colors.transparent,
                         ),
                       );
                     }
+                    return const SizedBox() ;
                   },
                 ),
               ),
-              ChangeNotifierProvider.value(
-                value: newsViewModel..gatNews(cardModel.id, selectedSource),
-                child: Expanded(
-                  child: Consumer<NewsViewModel>(
-                    builder: (context, value, child) {
-                      if (newsViewModel.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (newsViewModel.message != null) {
+              Expanded(
+                child: BlocProvider.value(
+                  value: NewsViewModel()..getNews(cardModel.id, selectedSource, languageCode, searchQuery),
+                  child: BlocBuilder<NewsViewModel, NewsState>(
+                    builder: (context, state) {
+
+                      if (state is NewsError) {
                         return Center(
                           child: ElevatedButton(
                               onPressed: () {
-                                setState(() {});
+                                BlocProvider.of<NewsViewModel>(context).getNews(
+                                    cardModel.id,
+                                    selectedSource,
+                                    languageCode,
+                                    searchController.toString());
                               },
                               child: const Text("try again")),
                         );
-                      } else {
+                      }
+                      if (state is NewsSuccess) {
                         return ListView.builder(
-                          itemBuilder: (context, index) =>
-                              InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                        context, ArticlesDetails.route,
-                                        arguments: newsViewModel
-                                            .articles[index]);
-                                  },
-                                  child: ArticleWidget(
-                                      article: newsViewModel.articles[index])),
-                          itemCount: newsViewModel.articles.length,
+                          itemBuilder: (context, index) => InkWell(
+                              onTap: () {
+                                Navigator.pushNamed(
+                                    context, ArticlesDetails.route,
+                                    arguments: state.listOfArticles[index]);
+                              },
+                              child: ArticleWidget(
+                                  article: state.listOfArticles[index])),
+                          itemCount: state.listOfArticles.length,
                         );
                       }
+                      return const Center(child: CircularProgressIndicator());
                     },
                   ),
                 ),
-              ),
+              )
             ],
           ),
-
         ));
   }
+
 }

@@ -10,7 +10,8 @@ class ApiManger {
   //  https://newsapi.org/v2/everything?domains=techcrunch.com,thenextweb.com&apiKey=bf45f280dc68433e9a9be7cf4129b08f
 
   static const baseUrl = "newsapi.org";
-  static const apiKey = "07786088d7c94536adc378f7d158cae0";
+  static const apiKey = "bf45f280dc68433e9a9be7cf4129b08f";
+     // "07786088d7c94536adc378f7d158cae0";
       // "bf45f280dc68433e9a9be7cf4129b08f";
 
   static Future<SourceResponse> getAllSources(String categoryID,String languageCode) async {

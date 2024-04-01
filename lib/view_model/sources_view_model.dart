@@ -1,37 +1,42 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app/api/api_manger.dart';
-import 'package:news_app/api/sources_response.dart';
+import 'package:news_app/model/sources_model.dart';
 
-class SourcesViewModel extends ChangeNotifier{
-  List sources = [];
-  String? message ;
-  String? state ;
-  bool isLoading = false;
-   getSources(String categoryID,String languageCode) async {
-    isLoading = true ;
-    notifyListeners();
-    try{
-      SourceResponse response = await ApiManger.getAllSources(categoryID,languageCode);
-      isLoading = false ;
-      if(response.status=="error"){
-        message =response.message;
-        state = response.status ;
-        notifyListeners();
+class SourcesViewModel extends Cubit<SourcesState> {
+  SourcesViewModel() : super(SourcesLoading());
 
-      }else{
-        sources = response.sources??[];
-        notifyListeners();
-
+  getSources(String categoryID, String languageCode) async {
+    try {
+      var sourcesResponse =
+          await ApiManger.getAllSources(categoryID, languageCode);
+      if (sourcesResponse.status == "error") {
+        emit(SourcesError(
+            errorMessage: sourcesResponse.message ?? "",
+            statues: sourcesResponse.status.toString()));
+      } else {
+        var sourcesList = sourcesResponse.sources ?? [];
+        emit(SourcesSuccess(listOfSources: sourcesList));
       }
-
-    }catch(e){
-      isLoading = false ;
-      message = e.toString();
-      notifyListeners();
-
+    } catch (e) {
+      emit(SourcesError(errorMessage: e.toString()));
     }
-    notifyListeners();
-
-
   }
+}
+
+abstract class SourcesState {}
+
+class SourcesLoading extends SourcesState {}
+
+class SourcesError extends SourcesState {
+  String errorMessage;
+
+  String statues;
+
+  SourcesError({required this.errorMessage, this.statues = ""});
+}
+
+class SourcesSuccess extends SourcesState {
+  List<SourceModel> listOfSources;
+
+  SourcesSuccess({required this.listOfSources});
 }
